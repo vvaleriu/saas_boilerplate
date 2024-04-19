@@ -12,7 +12,7 @@ import re
 DEFAULT_WEB_FOLDER = "web"
 SUPABASE_DEFAULT_PROJECT_NAME = "saas"
 DEFAULT_DOCKER_NETWORK_NAME = "saas"
-DEFAULT_POSTGRES_PASSWORD = "your-super-secret-and-long-postgres-password"
+DEFAULT_POSTGRES_PASSWORD = "postgres123"
 DEFAULT_POSTGRES_HOST = "db"
 DEFAULT_POSTGRES_DB = "postgres"
 DEFAULT_POSTGRES_PORT = 5432
@@ -206,6 +206,16 @@ def setup_web(env):
             file.write(line)
         file.close()
 
+    print(f"modification package.json pour ajouter --host et rendre le site accessible hors du docker")
+    with open('package.json', 'r+') as file:
+        # Read the content of the file
+        content = file.read()
+        content = re.sub(r'vite dev', 'vite dev --host', content, re.MULTILINE)
+        file.seek(0)
+        file.truncate()
+        file.write(content)
+        file.close()  
+
     # setup docker
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
     print(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
@@ -235,9 +245,9 @@ def main():
     if OVERRIDE_DEFAULT in ['y', 'Y']:
         ENV = get_user_input(ENV)
 
-    setup_repos(ENV)
-    setup_network(ENV)
-    setup_supabase(ENV)
+    # setup_repos(ENV)
+    # setup_network(ENV)
+    # setup_supabase(ENV)
     setup_web(ENV)
     # sys.exit()
     print('''

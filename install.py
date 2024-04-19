@@ -240,7 +240,7 @@ def main():
     setup_supabase(ENV)
     setup_web(ENV)
     # sys.exit()
-    print(f'''
+    print('''
 Lire le readme pour la suite. Le projet est maintenant quasi prêt à être lancé.
 Voir "https://supabase.com/docs/guides/self-hosting/docker" pour plus d'information.
 Pour lancer le projet :

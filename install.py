@@ -6,45 +6,46 @@ import pathlib
 import random
 import string
 
-
-
 # Define default values
 # DEFAULT_HOST_PORT = 8000
+DEFAULT_WEB_FOLDER = "web"
+SUPABASE_DEFAULT_PROJECT_NAME = "saas"
 DEFAULT_POSTGRES_PASSWORD = "your-super-secret-and-long-postgres-password"
 DEFAULT_POSTGRES_HOST = "db"
 DEFAULT_POSTGRES_DB = "postgres"
 DEFAULT_POSTGRES_PORT = 5432
-DEFAULT_DISABLE_SIGNUP = True
+DEFAULT_DISABLE_SIGNUP = 'true'
 DEFAULT_DASHBOARD_USERNAME = 'supabase'
 DEFAULT_DASHBOARD_PASSWORD = 'supabase123'
 DEFAULT_ADMINER_HOST_PORT = 14519
 
 # Define a list of variables with their expected type and default value
-variables = [
-    # ("HOST_PORT", int, DEFAULT_HOST_PORT),
-    ("POSTGRES_PASSWORD", str, DEFAULT_POSTGRES_PASSWORD),
-    ("POSTGRES_HOST", str, DEFAULT_POSTGRES_HOST),
-    ("POSTGRES_DB", str, DEFAULT_POSTGRES_DB),
-    ("POSTGRES_PORT", int, DEFAULT_POSTGRES_PORT),
-    ("DISABLE_SIGNUP", bool, DEFAULT_DISABLE_SIGNUP),
-    ("DASHBOARD_USERNAME", str, DEFAULT_DASHBOARD_USERNAME),
-    ("DASHBOARD_PASSWORD", str, DEFAULT_DASHBOARD_PASSWORD),
-    ("ADMINER_HOST_PORT", int, DEFAULT_ADMINER_HOST_PORT)
-]
+ENV = {
+    "WEB_FOLDER": {"name": "WEB_FOLDER", "type": str, "value": DEFAULT_WEB_FOLDER},
+    "STUDIO_DEFAULT_PROJECT": {"name": "STUDIO_DEFAULT_PROJECT", "type": str, "value": SUPABASE_DEFAULT_PROJECT_NAME},
+    "POSTGRES_HOST": {"name": "POSTGRES_HOST", "type": str, "value": DEFAULT_POSTGRES_HOST},
+    "POSTGRES_PORT": {"name": "POSTGRES_PORT", "type": int, "value": DEFAULT_POSTGRES_PORT},
+    "POSTGRES_DB": {"name": "POSTGRES_DB", "type": str, "value": DEFAULT_POSTGRES_DB},
+    "POSTGRES_PASSWORD": {"name": "POSTGRES_PASSWORD", "type": str, "value": DEFAULT_POSTGRES_PASSWORD},
+    "DISABLE_SIGNUP": {"name": "DISABLE_SIGNUP", "type": str, "value": DEFAULT_DISABLE_SIGNUP},
+    "DASHBOARD_USERNAME": {"name": "DASHBOARD_USERNAME", "type": str, "value": DEFAULT_DASHBOARD_USERNAME},
+    "DASHBOARD_PASSWORD": {"name": "DASHBOARD_PASSWORD", "type": str, "value": DEFAULT_DASHBOARD_PASSWORD},
+    "ADMINER_HOST_PORT": {"name": "ADMINER_HOST_PORT", "type": int, "value": DEFAULT_ADMINER_HOST_PORT},
+}
 
 # Create a dictionary to store the user input values
-user_input_values = {
-    'STUDIO_DEFAULT_PROJECT': '',
-    # 'HOST_PORT': DEFAULT_HOST_PORT,
-    'POSTGRES_PASSWORD': DEFAULT_POSTGRES_PASSWORD,
-    'POSTGRES_HOST': DEFAULT_POSTGRES_HOST,
-    'POSTGRES_DB': DEFAULT_POSTGRES_DB,
-    'POSTGRES_PORT': DEFAULT_POSTGRES_PORT,
-    'DISABLE_SIGNUP': DEFAULT_DISABLE_SIGNUP,
-    'DASHBOARD_USERNAME': DEFAULT_DASHBOARD_USERNAME,
-    'DASHBOARD_PASSWORD': DEFAULT_DASHBOARD_PASSWORD,
-    'ADMINER_HOST_PORT': DEFAULT_ADMINER_HOST_PORT,
-}
+# supabase_user_input_values = {
+#     'STUDIO_DEFAULT_PROJECT': '',
+#     # 'HOST_PORT': DEFAULT_HOST_PORT,
+#     'POSTGRES_PASSWORD': DEFAULT_POSTGRES_PASSWORD,
+#     'POSTGRES_HOST': DEFAULT_POSTGRES_HOST,
+#     'POSTGRES_DB': DEFAULT_POSTGRES_DB,
+#     'POSTGRES_PORT': DEFAULT_POSTGRES_PORT,
+#     'DISABLE_SIGNUP': DEFAULT_DISABLE_SIGNUP,
+#     'DASHBOARD_USERNAME': DEFAULT_DASHBOARD_USERNAME,
+#     'DASHBOARD_PASSWORD': DEFAULT_DASHBOARD_PASSWORD,
+#     'ADMINER_HOST_PORT': DEFAULT_ADMINER_HOST_PORT,
+# }
 
 OVERRIDE_DEFAULT = False
 SUPABASE_PATH = pathlib.Path(__file__).parent.resolve()
@@ -61,47 +62,46 @@ def get_random_string(length):
     result_str = ''.join(random.choice(letters) for i in range(length))
     print("Random string of length", length, "is:", result_str)
 
-# Ask user for input in a loop
-def ask_supabase_variable_value():
-    for var_name, var_type, default_value in variables:
-        while True:
-            user_input = input(f"Do you want to override the default value for {var_name} ({var_type.__name__})? Current default is {default_value}: ")
-            if user_input == "":
-                user_input_values[var_name] = default_value
-                break
+def get_user_input(env):
+    """
+    Function to get user input for each environment variable and validate the data type.
+
+    :param env: list of dictionaries representing the environment variables
+    :return: updated list with user inputs or the original list if no updates were made
+    """
+
+    for key, val in env.items():
+        # name = val["name"]
+        current_value = val["value"]
+        data_type = val["type"]
+
+        new_value = input(f"Enter value for {key} [default: {current_value}]: ")
+
+        if data_type == str:
             try:
-                # Convert input to expected type
-                if var_type == bool:
-                    user_input = user_input.lower() in ["true", "t", "yes", "y", "1"]
-                else:
-                    user_input = var_type(user_input)
-                user_input_values[var_name] = user_input
-                break
+                new_value = eval(new_value)
+                raise TypeError()
+            except (SyntaxError, NameError, TypeError):
+                pass  # Valid input as a string
+            else:
+                print(f"Invalid input for {key}. Current value '{current_value}' will be used.")
+                continue
+            
+        elif data_type == int:
+            try:
+                new_value = int(new_value)
             except ValueError:
-                print(f"Invalid input. Please enter a value of type {var_type.__name__}.")
+                print(f"Invalid input for {key}. Current value '{current_value}' will be used.")
+                continue
 
-    # Print the final values
-    print("\nSupabase instance values:")
-    user_input_values['DISABLE_SIGNUP'] = 'true' if user_input_values['DISABLE_SIGNUP'] in [True, 'y', 'yes', 'true', '1', 1] else 'false'
-    for var_name in user_input_values:
-        print(f"{var_name} = {user_input_values[var_name]}")
+        if new_value:
+            val["value"] = new_value
 
-## Choosing project installation path 
-def create_folder(path):
-    if os.path.exists(path):
-        print(f"this path already exists. Retry. Exiting")
-        sys.exit()
-    try:
-        os.makedirs(path)
-        print(f"Folder created at {path}")
-    except OSError as e:
-        print(f"Error creating folder: {e}")
+    for key, val in env.items():
+        print(f"{key}: {val['value']} ({val['type']})")
+    return env
 
-# ###########################
-# SUPABASE RELATIVE SCRIPTS
-# ###########################
-
-def setup_repos():
+def setup_repos(env):
     """
     Parameters:
     directory (str): directory the repo will be cloned in
@@ -109,13 +109,20 @@ def setup_repos():
     """
     os.chdir(pathlib.Path(__file__).parent.resolve())
     print(f'Repo as "CMSaasStarter.git" a subtree')
-    subprocess.run(["git", "subtree", "add", f"--prefix=web", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
-    print(f'Cloning supabase.git as ')
+    subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
+    print(f'SUPABASE')
     subprocess.run(["git", "clone", "--depth", "1", 'https://github.com/supabase/supabase.git'])
 
-def setup_env_file(path, input_values):
-    os.chdir(os.path.join(path, "supabase/docker"))
+# ###########################
+# SUPABASE RELATIVE SCRIPTS
+# ###########################
+
+
+def setup_supabase(env):
+    os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), "supabase/docker"))
     subprocess.run(["cp", ".env.example", ".env"])
+
+    env_names = (o['name'] for o in env)
     
     # CHANGE SUPABASE VALUES
     with open('.env', 'r+') as file:
@@ -132,9 +139,9 @@ def setup_env_file(path, input_values):
                 variable, value = line.strip().split('=')
                 
                 # Check if the variable is in the input_values dictionary
-                if variable in input_values:
+                if variable in env.keys():
                     # Replace the value with the one from the dictionary
-                    line = f'{variable}={input_values[variable]}\n'
+                    line = f"{variable}={env[variable]['value']}\n"
             
             # Write the line back to the file
             file.write(line)
@@ -142,8 +149,10 @@ def setup_env_file(path, input_values):
 
     # ADD ADMINER (postgres admin panl) ENV VALUES
     with open('.env', 'a') as file:
-        file.write('\n####### Personnal ENV variables')
-        file.write(f"\nADMINER_HOST_PORT={user_input_values['ADMINER_HOST_PORT']}\n")
+        file.write('\n############')
+        file.write('\n# Personnal ENV variables')
+        file.write('\n############')
+        file.write(f"\nADMINER_HOST_PORT={env['ADMINER_HOST_PORT']['value']}\n")
         file.close()
     print('Copie et modification du fichier supabase/docker/.env')
 
@@ -171,26 +180,15 @@ services:
     print('Modification du supabase/docker/docker-compose.yml pour ajouter adminer (interface admin postgres)')
 
 def main():
+    global ENV
 
-    setup_repos()
-    sys.exit()
-    # defining project name
-    while user_input_values['STUDIO_DEFAULT_PROJECT'] == '':
-        user_input_values['STUDIO_DEFAULT_PROJECT'] = input(f"Enter a project name: ")
-    
-    # Handling supabase variable values
     OVERRIDE_DEFAULT = input(f"Override default supabase values ? [y/N]")
     if OVERRIDE_DEFAULT in ['y', 'Y']:
-        ask_supabase_variable_value()
+        ENV = get_user_input(ENV)
 
-    ##### Supabase
-
-    # Creating installation path and handling installation
-    PROJECT_PATH = input("Enter a path full on the system where to install the supabase files. (The final installation will be \"/your/path/supabase\"): ")
-    # PROJECT_PATH = "/home/vincent/Projets/cocobongo"
-    create_folder(PROJECT_PATH)
-    setup_repos(PROJECT_PATH)
-
+    setup_repos(ENV)
+    setup_supabase(ENV)
+    sys.exit()
     setup_env_file(PROJECT_PATH)
     setup_docker_file(PROJECT_PATH)
     print(f'''

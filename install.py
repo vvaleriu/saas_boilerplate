@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 import pathlib
+import random
+import string
 
 
 
@@ -53,6 +55,11 @@ SUPABASE_PATH = pathlib.Path(__file__).parent.resolve()
 # FRONT
 # ###########################
 
+def get_random_string(length):
+    # choose from all lowercase letter
+    letters = string.ascii_lowercase
+    result_str = ''.join(random.choice(letters) for i in range(length))
+    print("Random string of length", length, "is:", result_str)
 
 # Ask user for input in a loop
 def ask_supabase_variable_value():
@@ -163,7 +170,7 @@ services:
 
 def main():
 
-    subtree_repo('web', 'https://github.com/CriticalMoments/CMSaasStarter.git extension/internationalization')
+    subtree_repo(get_random_string(4), 'https://github.com/CriticalMoments/CMSaasStarter.git extension/internationalization')
     subtree_repo('supabase', 'https://github.com/supabase/supabase.git master')
     sys.exit()
     # defining project name

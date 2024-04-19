@@ -109,6 +109,7 @@ def subtree_repo(directory, url):
     """
     print(f'Clonage du repo {directory} : "git subtree add --prefix={directory} --squash {url}"')
     os.chdir(pathlib.Path(__file__).parent.resolve())
+    print(f'working dir: {pathlib.Path(__file__).parent.resolve()}')
     subprocess.run(["git", "subtree", "add", f"--prefix={directory}", "--squash", url])
 
 def setup_env_file(path, input_values):
@@ -170,7 +171,7 @@ services:
 
 def main():
 
-    subtree_repo(get_random_string(4), 'https://github.com/CriticalMoments/CMSaasStarter.git extension/internationalization')
+    # subtree_repo(get_random_string(4), 'https://github.com/CriticalMoments/CMSaasStarter.git extension/internationalization')
     subtree_repo('supabase', 'https://github.com/supabase/supabase.git master')
     sys.exit()
     # defining project name

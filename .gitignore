@@ -1,3 +1,8 @@
+##### LOCAL
+supabase
+
+##### PYTHON
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

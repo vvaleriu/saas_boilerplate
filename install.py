@@ -208,6 +208,7 @@ def setup_web(env):
 
     # setup docker
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
+    print(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
     with open('.env', 'r+') as file:
         # Read the content of the file
         content = file.readlines()

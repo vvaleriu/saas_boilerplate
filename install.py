@@ -110,88 +110,6 @@ def setup_repos(env):
 def setup_network(env):
     subprocess.run(['docker', 'network', 'create', '-d', 'bridge', f"{env['DOCKER_NETWORK_NAME']['value']}"])
 
-# def setup_supabase(env):
-    
-#     #### SETUP ENV FILE
-
-#     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), "supabase/docker"))
-#     subprocess.run(["cp", ".env.example", ".env"])
-#     print(f"Copie de supabase/docker/.env.example -> supabase/docker/.env")
-    
-#     # CHANGE SUPABASE VALUES
-#     with open('.env', 'r+') as file:
-#         # Read the content of the file
-#         content = file.readlines()
-    
-#         # Go to the beginning of the file to overwrite it later
-#         file.seek(0)
-        
-#         # Loop through each line in the file
-#         for line in content:
-#             # Split the line into the variable name and its value
-#             if '=' in line:
-#                 variable, value = line.strip().split('=')
-                
-#                 # Check if the variable is in the input_values dictionary
-#                 if variable in env.keys():
-#                     # Replace the value with the one from the dictionary
-#                     line = f"{variable}={env[variable]['value']}\n"
-            
-#             # Write the line back to the file
-#             file.write(line)
-#         print(f"Mise à jour des variables d'environnement supabase")
-#         file.close()
-
-#     # add adminer (postgres admin panl) env values
-#     with open('.env', 'a') as file:
-#         file.write('\n############')
-#         file.write('\n# Personnal ENV variables')
-#         file.write('\n############\n')
-#         file.write(f"ADMINER_HOST_PORT={env['ADMINER_HOST_PORT']['value']}\n")
-#         file.write(f"NETWORK_NAME={env['DOCKER_NETWORK_NAME']['value']}\n")
-#         file.close()
-#         print('Ajout des variables d\'environnement personnelles supabase/docker/.env')
-
-
-#     #### SETUP DOCKER FILE
-
-#     # with open('docker-compose.yml', 'r') as file:
-#     #     lines = file.readlines()
-
-#     # Open the file in write mode
-#     with open('docker-compose.yml', 'w') as file:
-#         lines = file.readlines()
-#         file.seek(0)
-#         for line in lines:
-#             if "services:" in line:
-#                 file.write('''
-# services:
-#   # Manually added to manage postgresql db
-#   adminer:
-#     image: adminer
-#     restart: always
-#     ports:
-#       - ${ADMINER_HOST_PORT}:8080\n
-# \n''')
-#             # else:
-#             #     file.write(line)
-#     file.close()
-#     print('Modification du supabase/docker/docker-compose.yml pour ajouter adminer (interface admin postgres)')
-
-#     with open('docker-compose.yml', 'a') as file:
-#         for line in lines:
-#             if "services:" in line:
-#                 file.write('''
-# networks:
-#   default:
-#     name: ${NETWORK_NAME}
-#     external: true # network must have been created by another container
-# \n''')
-#             # else:
-#             #     file.write(line)
-#     file.close()
-#     print('Modification du supabase/docker/docker-compose.yml pour ajouter le reseau')
-
 def setup_supabase(env):
        
     #### SETUP ENV FILE
@@ -247,8 +165,6 @@ services:
     restart: always
     ports:
       - ${ADMINER_HOST_PORT}:8080\n''', content, re.MULTILINE)
-
-        print(content)
 
         content += '\n' + '''
 networks:
@@ -318,11 +234,11 @@ def main():
     if OVERRIDE_DEFAULT in ['y', 'Y']:
         ENV = get_user_input(ENV)
 
-    # setup_repos(ENV)
-    # setup_network(ENV)
+    setup_repos(ENV)
+    setup_network(ENV)
     setup_supabase(ENV)
-    # setup_web(ENV)
-    sys.exit()
+    setup_web(ENV)
+    # sys.exit()
     print(f'''
 Lire le readme pour la suite. Le projet est maintenant quasi prêt à être lancé.
 Voir "https://supabase.com/docs/guides/self-hosting/docker" pour plus d'information.

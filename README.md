@@ -1,6 +1,6 @@
-# saas_boilerplate
+# saas_template
 
-This will install and setup a boilerplate for a small Saas with this stack:
+This will install and setup a template for a small Saas with this stack:
 Backend: supabase
 Front: Sveltekit, TailwindCss, DaisyUI
 
@@ -10,4 +10,13 @@ Front: Sveltekit, TailwindCss, DaisyUI
 
 Command python3 and git must be on the system.
 
-Launch install.py to be prompt command lines to install
+# Installation
+
+Execute install.py and follow instructions.
+
+> chmod +x install.py
+> ./install.py
+
+Launch S
+
+# Start

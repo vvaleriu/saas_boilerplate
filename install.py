@@ -101,7 +101,7 @@ def create_folder(path):
 # SUPABASE RELATIVE SCRIPTS
 # ###########################
 
-def subtree_repo(directory, url):
+def subtree_repo(directory, url, branch):
     """
     Parameters:
     directory (str): directory the repo will be cloned in
@@ -110,7 +110,7 @@ def subtree_repo(directory, url):
     print(f'Clonage du repo {directory} : "git subtree add --prefix={directory} --squash {url}"')
     os.chdir(pathlib.Path(__file__).parent.resolve())
     print(f'working dir: {pathlib.Path(__file__).parent.resolve()}')
-    subprocess.run(["git", "subtree", "add", f"--prefix={directory}", "--squash", url])
+    subprocess.run(["git", "subtree", "add", f"--prefix={directory}", "--squash", url, branch])
 
 def setup_env_file(path, input_values):
     os.chdir(os.path.join(path, "supabase/docker"))
@@ -171,8 +171,8 @@ services:
 
 def main():
 
-    # subtree_repo(get_random_string(4), 'https://github.com/CriticalMoments/CMSaasStarter.git extension/internationalization')
-    subtree_repo('supabase', 'https://github.com/supabase/supabase.git master')
+    # subtree_repo(get_random_string(4), 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization')
+    subtree_repo('supabase', 'https://github.com/supabase/supabase.git', 'master')
     sys.exit()
     # defining project name
     while user_input_values['STUDIO_DEFAULT_PROJECT'] == '':

@@ -171,7 +171,7 @@ services:
 
 def main():
 
-    # subtree_repo(get_random_string(4), 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization')
+    subtree_repo('web', 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization')
     subtree_repo('supabase', 'https://github.com/supabase/supabase.git', 'master')
     sys.exit()
     # defining project name

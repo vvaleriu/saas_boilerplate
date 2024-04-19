@@ -10,6 +10,7 @@ import string
 # DEFAULT_HOST_PORT = 8000
 DEFAULT_WEB_FOLDER = "web"
 SUPABASE_DEFAULT_PROJECT_NAME = "saas"
+DEFAULT_DOCKER_NETWORK_NAME = "saas"
 DEFAULT_POSTGRES_PASSWORD = "your-super-secret-and-long-postgres-password"
 DEFAULT_POSTGRES_HOST = "db"
 DEFAULT_POSTGRES_DB = "postgres"
@@ -18,11 +19,14 @@ DEFAULT_DISABLE_SIGNUP = 'true'
 DEFAULT_DASHBOARD_USERNAME = 'supabase'
 DEFAULT_DASHBOARD_PASSWORD = 'supabase123'
 DEFAULT_ADMINER_HOST_PORT = 14519
+DEFAULT_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzA0NDA5MjAwLAogICJleHAiOiAxODYyMjYyMDAwCn0.-f1yFYT-yKZBO7wIuch8WjZ-JOCTVmW9blD1gzLbh7A"
+DEFAULT_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogInNlcnZpY2Vfcm9sZSIsCiAgImlzcyI6ICJzdXBhYmFzZSIsCiAgImlhdCI6IDE3MDQ0MDkyMDAsCiAgImV4cCI6IDE4NjIyNjIwMDAKfQ.yzJYfNC1JNgc6mTuP0bRjY4--BWwu2WfmURsrP6iFT0"
 
 # Define a list of variables with their expected type and default value
 ENV = {
     "WEB_FOLDER": {"name": "WEB_FOLDER", "type": str, "value": DEFAULT_WEB_FOLDER},
     "STUDIO_DEFAULT_PROJECT": {"name": "STUDIO_DEFAULT_PROJECT", "type": str, "value": SUPABASE_DEFAULT_PROJECT_NAME},
+    "DOCKER_NETWORK_NAME": {"name": "DOCKER_NETWORK_NAME", "type": str, "value": DEFAULT_DOCKER_NETWORK_NAME},
     "POSTGRES_HOST": {"name": "POSTGRES_HOST", "type": str, "value": DEFAULT_POSTGRES_HOST},
     "POSTGRES_PORT": {"name": "POSTGRES_PORT", "type": int, "value": DEFAULT_POSTGRES_PORT},
     "POSTGRES_DB": {"name": "POSTGRES_DB", "type": str, "value": DEFAULT_POSTGRES_DB},
@@ -31,21 +35,10 @@ ENV = {
     "DASHBOARD_USERNAME": {"name": "DASHBOARD_USERNAME", "type": str, "value": DEFAULT_DASHBOARD_USERNAME},
     "DASHBOARD_PASSWORD": {"name": "DASHBOARD_PASSWORD", "type": str, "value": DEFAULT_DASHBOARD_PASSWORD},
     "ADMINER_HOST_PORT": {"name": "ADMINER_HOST_PORT", "type": int, "value": DEFAULT_ADMINER_HOST_PORT},
+    "PUBLIC_SUPABASE_URL": {"name": "PUBLIC_SUPABASE_URL", "type": str, "value": "http://localhost:8000"},
+    "PUBLIC_SUPABASE_ANON_KEY": {"name": "PUBLIC_SUPABASE_ANON_KEY", "type": str, "value": DEFAULT_ANON_KEY},
+    "PRIVATE_SUPABASE_SERVICE_ROLE": {"name": "PRIVATE_SUPABASE_SERVICE_ROLE", "type": str, "value": DEFAULT_SERVICE_ROLE_KEY},
 }
-
-# Create a dictionary to store the user input values
-# supabase_user_input_values = {
-#     'STUDIO_DEFAULT_PROJECT': '',
-#     # 'HOST_PORT': DEFAULT_HOST_PORT,
-#     'POSTGRES_PASSWORD': DEFAULT_POSTGRES_PASSWORD,
-#     'POSTGRES_HOST': DEFAULT_POSTGRES_HOST,
-#     'POSTGRES_DB': DEFAULT_POSTGRES_DB,
-#     'POSTGRES_PORT': DEFAULT_POSTGRES_PORT,
-#     'DISABLE_SIGNUP': DEFAULT_DISABLE_SIGNUP,
-#     'DASHBOARD_USERNAME': DEFAULT_DASHBOARD_USERNAME,
-#     'DASHBOARD_PASSWORD': DEFAULT_DASHBOARD_PASSWORD,
-#     'ADMINER_HOST_PORT': DEFAULT_ADMINER_HOST_PORT,
-# }
 
 OVERRIDE_DEFAULT = False
 SUPABASE_PATH = pathlib.Path(__file__).parent.resolve()
@@ -109,20 +102,16 @@ def setup_repos(env):
     """
     os.chdir(pathlib.Path(__file__).parent.resolve())
     print(f'Repo as "CMSaasStarter.git" a subtree')
-    subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
+    subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}/app", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
     print(f'SUPABASE')
     subprocess.run(["git", "clone", "--depth", "1", 'https://github.com/supabase/supabase.git'])
 
-# ###########################
-# SUPABASE RELATIVE SCRIPTS
-# ###########################
-
-
 def setup_supabase(env):
+    
+    #### SETUP ENV FILE
+
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), "supabase/docker"))
     subprocess.run(["cp", ".env.example", ".env"])
-
-    env_names = (o['name'] for o in env)
     
     # CHANGE SUPABASE VALUES
     with open('.env', 'r+') as file:
@@ -147,7 +136,7 @@ def setup_supabase(env):
             file.write(line)
         file.close()
 
-    # ADD ADMINER (postgres admin panl) ENV VALUES
+    # add adminer (postgres admin panl) env values
     with open('.env', 'a') as file:
         file.write('\n############')
         file.write('\n# Personnal ENV variables')
@@ -156,8 +145,9 @@ def setup_supabase(env):
         file.close()
     print('Copie et modification du fichier supabase/docker/.env')
 
-def setup_docker_file(path):
-    os.chdir(os.path.join(path, "supabase/docker"))
+
+    #### SETUP DOCKER FILE
+
     with open('docker-compose.yml', 'r') as file:
         lines = file.readlines()
 
@@ -179,6 +169,33 @@ services:
     file.close()
     print('Modification du supabase/docker/docker-compose.yml pour ajouter adminer (interface admin postgres)')
 
+def setup_web(env):
+    os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}", "app"))
+    subprocess.run(["cp", "local_env_template", ".env.local"])
+
+    print(f"Copie et remplissage du fichier .env.local")
+    with open('.env.local', 'r+') as file:
+        # Read the content of the file
+        content = file.readlines()
+    
+        # Go to the beginning of the file to overwrite it later
+        file.seek(0)
+        
+        # Loop through each line in the file
+        for line in content:
+            # Split the line into the variable name and its value
+            if '=' in line:
+                variable, value = line.strip().split('=')
+                
+                # Check if the variable is in the input_values dictionary
+                if variable in env.keys():
+                    # Replace the value with the one from the dictionary
+                    line = f"{variable}={env[variable]['value']}\n"
+            
+            # Write the line back to the file
+            file.write(line)
+        file.close()
+
 def main():
     global ENV
 
@@ -187,10 +204,9 @@ def main():
         ENV = get_user_input(ENV)
 
     setup_repos(ENV)
-    setup_supabase(ENV)
+    # setup_supabase(ENV)
+    setup_web(ENV)
     sys.exit()
-    setup_env_file(PROJECT_PATH)
-    setup_docker_file(PROJECT_PATH)
     print(f'''
 Le projet est maintenant prêt à être lancé.
 Voir "https://supabase.com/docs/guides/self-hosting/docker" pour plus d'information.

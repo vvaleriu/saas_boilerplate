@@ -1,4 +1,6 @@
-# saas_template
+# SaaS template
+
+THIS IS A TEMPLATE. JUST FORK THE PRJECT AND USE IT TO CREATE YOUR SaaS !
 
 This will install and setup a template for a small Saas with this stack:
 Backend: supabase

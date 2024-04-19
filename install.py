@@ -102,6 +102,7 @@ def setup_repos(env):
     """
     os.chdir(pathlib.Path(__file__).parent.resolve())
     print(f'Repo as "CMSaasStarter.git" a subtree')
+    subprocess.run(["mkdir", "-p", f"{env['WEB_FOLDER']['value']}"])
     subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}/app", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
     print(f'SUPABASE')
     subprocess.run(["git", "clone", "--depth", "1", 'https://github.com/supabase/supabase.git'])

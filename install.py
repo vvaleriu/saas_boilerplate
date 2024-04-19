@@ -101,7 +101,7 @@ def create_folder(path):
 # SUPABASE RELATIVE SCRIPTS
 # ###########################
 
-def setup_repos(directory, url, branch):
+def setup_repos():
     """
     Parameters:
     directory (str): directory the repo will be cloned in
@@ -109,7 +109,7 @@ def setup_repos(directory, url, branch):
     """
     os.chdir(pathlib.Path(__file__).parent.resolve())
     print(f'Repo as "CMSaasStarter.git" a subtree')
-    subprocess.run(["git", "subtree", "add", f"--prefix={directory}", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
+    subprocess.run(["git", "subtree", "add", f"--prefix=web", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
     print(f'Cloning supabase.git as ')
     subprocess.run(["git", "clone", "--depth", "1", 'https://github.com/supabase/supabase.git'])
 

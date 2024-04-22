@@ -53,16 +53,24 @@ On first launch, do not forget to copy and execute sql from
 `web/app/database_migration.sql` into `http://localhost:8000/project/default/sql/1`
 
 ## Launch web
-> cd web
-> docker compose up     # Just launch the container without running nodejs
-> docker exec -it {DEFAULT_WEB_FOLDER} /bin/bash
-> pnpm run dev
 
-go to: `http://localhost:5173/`
+### start docker container
+```
+cd web
+docker compose up     # Just launch the container without running nodejs
+```
+### Connect to web container and launch web server
+```
+docker exec -it {DEFAULT_WEB_FOLDER} /bin/bash
+pnpm run dev
+```
 
-For further details, go to:
+### go to: `http://localhost:5173/`
+
+# Further details
+go to:
 ```https://github.com/CriticalMoments/CMSaasStarter```
 
-And 
+and 
 
 ```https://supabase.com/docs/guides/self-hosting/docker```

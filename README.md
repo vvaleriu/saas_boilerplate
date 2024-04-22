@@ -38,6 +38,14 @@ DEFAULT_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjo
 
 # Start
 
+## Launch All services
+
+### start docker container
+```
+cd web
+docker compose up     
+```
+### go to: `http://localhost:5173/`
 ## Supabase
 
 Supabase default credentials with this project are:
@@ -45,35 +53,14 @@ Supabase default credentials with this project are:
 login: supabase
 pass: supabase123
 ```
-### On first launch
-```
-cd /{PROJECT_PATH}/supabase/docker
-docker-compose up --force-recreate
-```
-
-Copy and execute sql from
-`web/app/database_migration.sql` into `http://localhost:8000/project/default/sql/1`
-
-### Subsequent laucnh
-> docker compose up
 
 go to `url: http://localhost:8000/`
 
 
-## Launch web
-
-### start docker container
-```
-cd web
-docker compose up     # Just launch the container without running nodejs
-```
-### Connect to web container and launch web server
+### Connect to web container 
 ```
 docker exec -it {containerID} /bin/bash
-pnpm run dev
 ```
-
-### go to: `http://localhost:5173/`
 
 # Further details
 go to:

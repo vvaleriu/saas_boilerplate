@@ -38,24 +38,27 @@ DEFAULT_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjo
 
 # Start
 
-## Launch supabase
-> cd /project/path/supabase/docker
-> docker compose up
-
-go to `url: http://localhost:8000/`
-
+## Supabase
 
 Supabase default credentials with this project are:
 ```
 login: supabase
 pass: supabase123
 ```
-
 ### On first launch
-> docker-compose up --force-recreate
+```
+cd /{PROJECT_PATH}/supabase/docker
+docker-compose up --force-recreate
+```
 
 Copy and execute sql from
 `web/app/database_migration.sql` into `http://localhost:8000/project/default/sql/1`
+
+### Subsequent laucnh
+> docker compose up
+
+go to `url: http://localhost:8000/`
+
 
 ## Launch web
 

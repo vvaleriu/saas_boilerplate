@@ -46,10 +46,15 @@ go to `url: http://localhost:8000/`
 
 
 Supabase default credentials with this project are:
-> login: supabase
-> pass: supabase123
+```
+login: supabase
+pass: supabase123
+```
 
-On first launch, do not forget to copy and execute sql from
+### On first launch
+> docker-compose up --force-recreate
+
+Copy and execute sql from
 `web/app/database_migration.sql` into `http://localhost:8000/project/default/sql/1`
 
 ## Launch web
@@ -61,7 +66,7 @@ docker compose up     # Just launch the container without running nodejs
 ```
 ### Connect to web container and launch web server
 ```
-docker exec -it {DEFAULT_WEB_FOLDER} /bin/bash
+docker exec -it {containerID} /bin/bash
 pnpm run dev
 ```
 

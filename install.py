@@ -169,8 +169,7 @@ services:
         content += '\n' + '''
 networks:
   default:
-    name: ${NETWORK_NAME}
-    external: true # network must have been created by another container'''
+    name: ${NETWORK_NAME}'''
         print('Modification du supabase/docker/docker-compose.yml pour ajouter adminer (interface admin postgres)')
         print('Modification du supabase/docker/docker-compose.yml pour ajouter le reseau')
 

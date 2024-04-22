@@ -245,9 +245,9 @@ def main():
     if OVERRIDE_DEFAULT in ['y', 'Y']:
         ENV = get_user_input(ENV)
 
-    # setup_repos(ENV)
-    # setup_network(ENV)
-    # setup_supabase(ENV)
+    setup_repos(ENV)
+    setup_network(ENV)
+    setup_supabase(ENV)
     setup_web(ENV)
     # sys.exit()
     print('''

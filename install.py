@@ -11,7 +11,7 @@ import re
 # DEFAULT_HOST_PORT = 8000
 DEFAULT_WEB_FOLDER = "web"
 SUPABASE_DEFAULT_PROJECT_NAME = "saas"
-DEFAULT_DOCKER_NETWORK_NAME = "saas"
+# DEFAULT_DOCKER_NETWORK_NAME = "saas"
 DEFAULT_POSTGRES_PASSWORD = "postgres123"
 DEFAULT_POSTGRES_HOST = "db"
 DEFAULT_POSTGRES_DB = "postgres"
@@ -25,9 +25,10 @@ DEFAULT_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjo
 
 # Define a list of variables with their expected type and default value
 ENV = {
+    "APP_NAME": {"name": "APP_NAME", "type": str, "value": SUPABASE_DEFAULT_PROJECT_NAME},
     "WEB_FOLDER": {"name": "WEB_FOLDER", "type": str, "value": DEFAULT_WEB_FOLDER},
     "STUDIO_DEFAULT_PROJECT": {"name": "STUDIO_DEFAULT_PROJECT", "type": str, "value": SUPABASE_DEFAULT_PROJECT_NAME},
-    "DOCKER_NETWORK_NAME": {"name": "DOCKER_NETWORK_NAME", "type": str, "value": DEFAULT_DOCKER_NETWORK_NAME},
+    # "DOCKER_NETWORK_NAME": {"name": "DOCKER_NETWORK_NAME", "type": str, "value": DEFAULT_DOCKER_NETWORK_NAME},
     "POSTGRES_HOST": {"name": "POSTGRES_HOST", "type": str, "value": DEFAULT_POSTGRES_HOST},
     "POSTGRES_PORT": {"name": "POSTGRES_PORT", "type": int, "value": DEFAULT_POSTGRES_PORT},
     "POSTGRES_DB": {"name": "POSTGRES_DB", "type": str, "value": DEFAULT_POSTGRES_DB},
@@ -87,6 +88,9 @@ def get_user_input(env):
         if new_value:
             val["value"] = new_value
 
+    env['STUDIO_DEFAULT_PROJECT'] = {"name": "STUDIO_DEFAULT_PROJECT", "type": str, "value": env['APP_NAME']}
+
+    print('\n')
     for key, val in env.items():
         print(f"{key}: {val['value']} ({val['type']})")
     return env

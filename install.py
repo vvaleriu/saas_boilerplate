@@ -143,7 +143,10 @@ def setup_web(env):
     ### Cloning repo as a subtree
     os.chdir(pathlib.Path(__file__).parent.resolve())
     print(f'Repo as "CMSaasStarter.git" a subtree')
+    # print(f"{env['WEB_FOLDER']['value']}")
+    # os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
     subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}/app", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
+    # subprocess.run(["git", "subtree", "add", f"--prefix=app", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
 
     print(f"Copie et remplissage du fichier .env.local")
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}", "app"))
@@ -157,14 +160,14 @@ def setup_docker_compose(env):
 def main():
     global ENV
 
-    OVERRIDE_DEFAULT = input(f"Override default supabase values ? [y/N]")
-    if OVERRIDE_DEFAULT in ['y', 'Y']:
-        ENV = get_user_input(ENV)
+    # OVERRIDE_DEFAULT = input(f"Override default supabase values ? [y/N]")
+    # if OVERRIDE_DEFAULT in ['y', 'Y']:
+    #     ENV = get_user_input(ENV)
 
-    SETUP_SUPBASE = input(f"Install supabase as the backend for the project ? [Y/n] ")
-    if SETUP_SUPBASE in ['true', 'y', 'yes', 'YES', 'Y', True, 'o', 'oui', 'O', 'OUI']:
-        RUN_SUPABASE_MIGRATION = input(f"Run supbase migration ? [Y/n] ")
-        setup_supabase(ENV)
+    # SETUP_SUPBASE = input(f"Install supabase as the backend for the project ? [Y/n] ")
+    # if SETUP_SUPBASE in ['', None, 'true', 'y', 'yes', 'YES', 'Y', True, 'o', 'oui', 'O', 'OUI']:
+    #     RUN_SUPABASE_MIGRATION = input(f"Run supbase migration ? [Y/n] ")
+    #     setup_supabase(ENV)
 
     setup_web(ENV)
     setup_docker_compose(ENV)

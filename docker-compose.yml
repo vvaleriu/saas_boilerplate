@@ -6,8 +6,8 @@ services:
   app:
     container_name: ${APP_NAME}
     build: 
-      context: .
-      dockerfile: ./web/docker/Dockerfile
+      context: ./web
+      dockerfile: ./docker/Dockerfile
     restart: unless-stopped
     command: pnpm run dev --host 0.0.0.0 --port ${HTTP_APP_PORT}
     env_file:
@@ -19,7 +19,7 @@ services:
     ports:
       - ${HTTPS_APP_PORT}:8443
     volumes:
-      - ./app/:${APP_PATH:-/var/www/app/}
+      - ./web/app/:${APP_PATH:-/var/www/app/}
       - ${APP_PATH:-/var/www/app/}/node_modules
 
   adminer:

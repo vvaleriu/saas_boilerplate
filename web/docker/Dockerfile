@@ -33,7 +33,7 @@ VOLUME ${APP_PATH}/
 # At the end, set the user to use when running this image
 USER node
 
-COPY ../app/package.json ${APP_PATH}
+# COPY ../app/package.json ${APP_PATH}
 # COPY ./app/package.json ${APP_PATH}
 
 EXPOSE ${HTTP_APP_PORT}
@@ -42,6 +42,8 @@ EXPOSE ${HTTP_APP_PORT}
 # WORKDIR /var/www
 # RUN pnpm create svelte@latest app
 WORKDIR ${APP_PATH}
+RUN cwd
+RUN ls -la
 RUN pnpm install
 
-# ENTRYPOINT ["tail", "-f", "/dev/null"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]

@@ -95,7 +95,7 @@ def update_config_file(env, file_path):
     '''
     
     '''
-    with open('file_path', 'r+') as file:
+    with open(file_path, 'r+') as file:
         # Read the content of the file
         content = file.readlines()
     
@@ -115,7 +115,6 @@ def update_config_file(env, file_path):
             
             # Write the line back to the file
             file.write(line)
-        print(f"Mise à jour des variables d'environnement du fichier : {file_path}")
         file.close()
 
 def setup_supabase(env):
@@ -152,25 +151,26 @@ def setup_web(env):
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}", "app"))
     subprocess.run(["cp", "local_env_template", ".env.local"])
     update_config_file(env, '.env.local')
+    print(f"Mise à jour des variables d'environnement du fichier : web/app/.env.local")
 
-def setup_docker_compose(env):
+def setup_docker_compose_env(env):
     os.chdir(pathlib.Path(__file__).parent.resolve())
     update_config_file(env, '.env')
 
 def main():
     global ENV
 
-    # OVERRIDE_DEFAULT = input(f"Override default supabase values ? [y/N]")
-    # if OVERRIDE_DEFAULT in ['y', 'Y']:
-    #     ENV = get_user_input(ENV)
+    OVERRIDE_DEFAULT = input(f"Override default supabase values ? [y/N]")
+    if OVERRIDE_DEFAULT in ['y', 'Y']:
+        ENV = get_user_input(ENV)
 
-    # SETUP_SUPBASE = input(f"Install supabase as the backend for the project ? [Y/n] ")
-    # if SETUP_SUPBASE in ['', None, 'true', 'y', 'yes', 'YES', 'Y', True, 'o', 'oui', 'O', 'OUI']:
-    #     RUN_SUPABASE_MIGRATION = input(f"Run supbase migration ? [Y/n] ")
-    #     setup_supabase(ENV)
+    SETUP_SUPBASE = input(f"Install supabase as the backend for the project ? [Y/n] ")
+    if SETUP_SUPBASE in ['', None, 'true', 'y', 'yes', 'YES', 'Y', True, 'o', 'oui', 'O', 'OUI']:
+        RUN_SUPABASE_MIGRATION = input(f"Run supbase migration ? [Y/n] ")
+        setup_supabase(ENV)
 
     setup_web(ENV)
-    setup_docker_compose(ENV)
+    setup_docker_compose_env(ENV)
     print('''
 Lire le README.md du dépôt pour la suite. Le projet est maintenant quasi prêt à être lancé.
 Voir "https://supabase.com/docs/guides/self-hosting/docker" pour plus d'information.

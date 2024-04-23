@@ -43,18 +43,14 @@ ENV = {
 
 OVERRIDE_DEFAULT = False
 SUPABASE_PATH = pathlib.Path(__file__).parent.resolve()
+SETUP_SUPBASE = True
+RUN_SUPABASE_MIGRATION = True
 
 ## Manage supabase variables values
 
 # ###########################
 # FRONT
 # ###########################
-
-def get_random_string(length):
-    # choose from all lowercase letter
-    letters = string.ascii_lowercase
-    result_str = ''.join(random.choice(letters) for i in range(length))
-    print("Random string of length", length, "is:", result_str)
 
 def get_user_input(env):
     """
@@ -95,104 +91,68 @@ def get_user_input(env):
         print(f"{key}: {val['value']} ({val['type']})")
     return env
 
-def setup_repos(env):
-    """
-    Parameters:
-    directory (str): directory the repo will be cloned in
-    url (str): repo url to be cloned as a subtree
-    """
-    os.chdir(pathlib.Path(__file__).parent.resolve())
-    print(f'Repo as "CMSaasStarter.git" a subtree')
-    # subprocess.run(["mkdir", "-p", f"{env['WEB_FOLDER']['value']}"])
-    subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}/app", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
-    # subprocess.run(["git", "clone", "--depth", "1", 'https://github.com/supabase/supabase.git'])
+def update_config_file(env, file_path):
+    '''
+    
+    '''
+    with open('file_path', 'r+') as file:
+        # Read the content of the file
+        content = file.readlines()
+    
+        # Go to the beginning of the file to overwrite it later
+        file.seek(0)
+        
+        # Loop through each line in the file
+        for line in content:
+            # Split the line into the variable name and its value
+            if '=' in line:
+                variable, value = line.strip().split('=')
+                
+                # Check if the variable is in the input_values dictionary
+                if variable in env.keys():
+                    # Replace the value with the one from the dictionary
+                    line = f"{variable}={env[variable]['value']}\n"
+            
+            # Write the line back to the file
+            file.write(line)
+        print(f"Mise à jour des variables d'environnement du fichier : {file_path}")
+        file.close()
+
+def setup_supabase(env):
+    
+    #### Cloning repo
     subprocess.run(["git", "clone", "--depth", "1",'--filter=blob:none', '--sparse', 'https://github.com/supabase/supabase.git'])
     subprocess.run(['git', '-C', 'supabase','sparse-checkout', 'set', 'docker'])
 
-def setup_network(env):
-    subprocess.run(['docker', 'network', 'create', '-d', 'bridge', f"{env['DOCKER_NETWORK_NAME']['value']}"])
-
-def setup_supabase(env):
-       
     #### SETUP ENV FILE
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), "supabase/docker"))
     subprocess.run(["cp", ".env.example", ".env"])
     print(f"Copie de supabase/docker/.env.example -> supabase/docker/.env")
-    subprocess.run(["cp", "../../web/app/database_migration.sql", "./volumes/db/database_migration.sql"])
-    print(f"Copie de web/app/database_migration.sql -> supabase/docker/volumes/db/database_migration.sql")
     
     # change supabase env values
-    with open('.env', 'r+') as file:
-        # Read the content of the file
-        content = file.readlines()
-    
-        # Go to the beginning of the file to overwrite it later
-        file.seek(0)
-        
-        # Loop through each line in the file
-        for line in content:
-            # Split the line into the variable name and its value
-            if '=' in line:
-                variable, value = line.strip().split('=')
-                
-                # Check if the variable is in the input_values dictionary
-                if variable in env.keys():
-                    # Replace the value with the one from the dictionary
-                    line = f"{variable}={env[variable]['value']}\n"
-            
-            # Write the line back to the file
-            file.write(line)
-        print(f"Mise à jour des variables d'environnement supabase")
-        file.close()
+    update_config_file(env, '.env')
+
+    ### run migration
+    if RUN_SUPABASE_MIGRATION in ['true', 'y', 'yes', 'YES', 'Y', True, 'o', 'oui', 'O', 'OUI']:
+        print("implement migration running for supabase")
+        # subprocess.run(["cp", "../../web/app/database_migration.sql", "./volumes/db/database_migration.sql"])
+        # print(f"Copie de web/app/database_migration.sql -> supabase/docker/volumes/db/database_migration.sql")
 
 def setup_web(env):
-    os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}", "app"))
-    subprocess.run(["cp", "local_env_template", ".env.local"])
+
+    ### Cloning repo as a subtree
+    os.chdir(pathlib.Path(__file__).parent.resolve())
+    print(f'Repo as "CMSaasStarter.git" a subtree')
+    subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}/app", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
 
     print(f"Copie et remplissage du fichier .env.local")
-    with open('.env.local', 'r+') as file:
-        # Read the content of the file
-        content = file.readlines()
-    
-        # Go to the beginning of the file to overwrite it later
-        file.seek(0)
-        
-        # Loop through each line in the file
-        for line in content:
-            # Split the line into the variable name and its value
-            if '=' in line:
-                variable, value = line.strip().split('=')
-                
-                # Check if the variable is in the input_values dictionary
-                if variable in env.keys():
-                    # Replace the value with the one from the dictionary
-                    line = f"{variable}={env[variable]['value']}\n"
-            
-            # Write the line back to the file
-            file.write(line)
-        file.close()
+    os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}", "app"))
+    subprocess.run(["cp", "local_env_template", ".env.local"])
+    update_config_file(env, '.env.local')
 
-    # setup docker
-    os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
-    print(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
-    with open('.env', 'r+') as file:
-        # Read the content of the file
-        content = file.readlines()
-    
-        # Go to the beginning of the file to overwrite it later
-        file.seek(0)
-        
-        # Loop through each line in the file
-        for line in content:
-            # Split the line into the variable name and its value
-            if 'APP_NAME' in line:
-                line = f"APP_NAME={env['STUDIO_DEFAULT_PROJECT']['value']}\n"
-            elif 'NETWORK_NAME' in line:
-                line = f"NETWORK_NAME={env['DOCKER_NETWORK_NAME']['value']}\n"
-            
-            # Write the line back to the file
-            file.write(line)
-        file.close()
+def setup_docker_compose(env):
+    os.chdir(pathlib.Path(__file__).parent.resolve())
+    update_config_file(env, '.env')
 
 def main():
     global ENV
@@ -201,23 +161,23 @@ def main():
     if OVERRIDE_DEFAULT in ['y', 'Y']:
         ENV = get_user_input(ENV)
 
-    setup_repos(ENV)
-    # setup_network(ENV)
-    setup_supabase(ENV)
+    SETUP_SUPBASE = input(f"Install supabase as the backend for the project ? [Y/n] ")
+    if SETUP_SUPBASE in ['true', 'y', 'yes', 'YES', 'Y', True, 'o', 'oui', 'O', 'OUI']:
+        RUN_SUPABASE_MIGRATION = input(f"Run supbase migration ? [Y/n] ")
+        setup_supabase(ENV)
+
     setup_web(ENV)
-    # sys.exit()
+    setup_docker_compose(ENV)
     print('''
-Lire le readme pour la suite. Le projet est maintenant quasi prêt à être lancé.
+Lire le README.md du dépôt pour la suite. Le projet est maintenant quasi prêt à être lancé.
 Voir "https://supabase.com/docs/guides/self-hosting/docker" pour plus d'information.
-Pour lancer le projet :
+Run project:
 cd {PROJECT_PATH}
-
-# Pull the latest images
-docker compose pull
-
-# Start the services (in detached mode)
 docker compose up -d
-          ''')
+          
+## Print sveltekit logs
+docker compose logs --follow web       
+''')
 
 if __name__ == "__main__":
     main()

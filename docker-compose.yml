@@ -1,15 +1,14 @@
 include:
-  - path : ../supabase/docker/docker-compose.yml  #with serviceB declared
-    env_file: ../supabase/docker/.env
+  - path : ./supabase/docker/docker-compose.yml
+    env_file: ./supabase/docker/.env
 
 services:
-  web:
+  app:
     container_name: ${APP_NAME}
     build: 
       context: .
-      dockerfile: docker/Dockerfile
-    # restart: unless-stopped
-    # restart: no
+      dockerfile: ./web/docker/Dockerfile
+    restart: unless-stopped
     command: pnpm run dev --host 0.0.0.0 --port ${HTTP_APP_PORT}
     env_file:
       - .env
@@ -18,18 +17,15 @@ services:
       HTTP_APP_PORT: ${HTTP_APP_PORT:-5173}
       APP_PATH: ${APP_PATH:-/var/www/app/}
     ports:
-      - ${HTTP_APP_PORT}:${HTTP_APP_PORT}
-      # - ${HTTPS_APP_PORT}:8443
+      - ${HTTPS_APP_PORT}:8443
     volumes:
       - ./app/:${APP_PATH:-/var/www/app/}
       - ${APP_PATH:-/var/www/app/}/node_modules
 
   adminer:
     image: adminer
-    #restart: always
+    restart: unless-stopped
     ports:
       - ${ADMINER_HOST_PORT:-8080}:8080
-# networks:
-#   default:
-#     name: ${NETWORK_NAME}
-#     external: true # network must have been created by another container
+    depends_on:
+      - db # declared in ./supabase/docker/docker-compose.yml

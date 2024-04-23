@@ -44,5 +44,4 @@ EXPOSE ${HTTP_APP_PORT}
 WORKDIR ${APP_PATH}
 RUN pnpm install
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
-# ENTRYPOINT ["pnpm", "run", "dev"]
+# ENTRYPOINT ["tail", "-f", "/dev/null"]

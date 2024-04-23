@@ -105,7 +105,9 @@ def setup_repos(env):
     print(f'Repo as "CMSaasStarter.git" a subtree')
     # subprocess.run(["mkdir", "-p", f"{env['WEB_FOLDER']['value']}"])
     subprocess.run(["git", "subtree", "add", f"--prefix={env['WEB_FOLDER']['value']}/app", "--squash", 'https://github.com/CriticalMoments/CMSaasStarter.git', 'extension/internationalization'])
-    subprocess.run(["git", "clone", "--depth", "1", 'https://github.com/supabase/supabase.git'])
+    # subprocess.run(["git", "clone", "--depth", "1", 'https://github.com/supabase/supabase.git'])
+    subprocess.run(["git", "clone", "--depth", "1",'--filter=blob:none', '--sparse', 'https://github.com/supabase/supabase.git'])
+    subprocess.run(['git', '-C', 'supabase','sparse-checkout', 'set', 'docker'])
 
 def setup_network(env):
     subprocess.run(['docker', 'network', 'create', '-d', 'bridge', f"{env['DOCKER_NETWORK_NAME']['value']}"])
@@ -116,6 +118,8 @@ def setup_supabase(env):
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), "supabase/docker"))
     subprocess.run(["cp", ".env.example", ".env"])
     print(f"Copie de supabase/docker/.env.example -> supabase/docker/.env")
+    subprocess.run(["cp", "../../web/app/database_migration.sql", "./volumes/db/database_migration.sql"])
+    print(f"Copie de web/app/database_migration.sql -> supabase/docker/volumes/db/database_migration.sql")
     
     # change supabase env values
     with open('.env', 'r+') as file:
@@ -139,44 +143,6 @@ def setup_supabase(env):
             # Write the line back to the file
             file.write(line)
         print(f"Mise à jour des variables d'environnement supabase")
-        file.close()
-
-    # add adminer (postgres admin panl) env values
-    with open('.env', 'a') as file:
-        file.write('\n############')
-        file.write('\n# Personnal ENV variables')
-        file.write('\n############\n')
-        file.write(f"ADMINER_HOST_PORT={env['ADMINER_HOST_PORT']['value']}\n")
-        file.write(f"NETWORK_NAME={env['DOCKER_NETWORK_NAME']['value']}\n")
-        file.close()
-        print('Ajout des variables d\'environnement personnelles supabase/docker/.env')
-
-    #### SETUP DOCKER FILE
-
-    with open('docker-compose.yml', 'r+') as file:
-        content = file.read()
-
-        # Find the line starting with "service:" and replace it with the multi-line string
-        content = re.sub(r'services\:', '''
-services:
-  # Manually added to manage postgresql db
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - ${ADMINER_HOST_PORT}:8080\n''', content, re.MULTILINE)
-
-        content += '\n' + '''
-networks:
-  default:
-    name: ${NETWORK_NAME}
-    external: true\n'''
-        print('Modification du supabase/docker/docker-compose.yml pour ajouter adminer (interface admin postgres)')
-        print('Modification du supabase/docker/docker-compose.yml pour ajouter le reseau')
-
-        file.seek(0)
-        file.truncate()
-        file.write(content)
         file.close()
 
 def setup_web(env):
@@ -205,16 +171,6 @@ def setup_web(env):
             # Write the line back to the file
             file.write(line)
         file.close()
-
-    print(f"modification package.json pour ajouter --host et rendre le site accessible hors du docker")
-    with open('package.json', 'r+') as file:
-        # Read the content of the file
-        content = file.read()
-        content = re.sub(r'vite dev', 'vite dev --host', content, re.MULTILINE)
-        file.seek(0)
-        file.truncate()
-        file.write(content)
-        file.close()  
 
     # setup docker
     os.chdir(os.path.join(pathlib.Path(__file__).parent.resolve(), f"{env['WEB_FOLDER']['value']}"))
@@ -246,7 +202,7 @@ def main():
         ENV = get_user_input(ENV)
 
     setup_repos(ENV)
-    setup_network(ENV)
+    # setup_network(ENV)
     setup_supabase(ENV)
     setup_web(ENV)
     # sys.exit()

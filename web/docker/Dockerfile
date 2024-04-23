@@ -33,14 +33,11 @@ VOLUME ${APP_PATH}/
 # At the end, set the user to use when running this image
 USER node
 
-# COPY ../app/package.json ${APP_PATH}
-# COPY ./app/package.json ${APP_PATH}
+COPY ../app/package.json ${APP_PATH}
 
 EXPOSE ${HTTP_APP_PORT}
 
 # Installation de sveltekit
-# WORKDIR /var/www
-# RUN pnpm create svelte@latest app
 WORKDIR ${APP_PATH}
 RUN pnpm install
 
